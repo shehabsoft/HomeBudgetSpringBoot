@@ -1,5 +1,7 @@
 package com.homeBudget.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.io.Serializable;
 import javax.persistence.*;
 import java.util.Date;
@@ -38,7 +40,7 @@ public class Purchase implements Serializable {
 	private int status;
 
 	//bi-directional many-to-one association to ApprovedPurchases
-	@ManyToOne
+	@OneToOne
 	@JoinColumn(name="approved_Purchase_ID")
 	private ApprovedPurchases approvedPurchas;
 
@@ -54,6 +56,7 @@ public class Purchase implements Serializable {
 	private MonthlyBudget monthlyBudget;
 
 	//bi-directional many-to-one association to PurchaseHistory
+	@JsonIgnore
 	@OneToMany(mappedBy="purchase")
 	private List<PurchaseHistory> purchaseHistories;
 

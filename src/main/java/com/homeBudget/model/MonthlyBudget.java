@@ -49,7 +49,7 @@ public class MonthlyBudget implements Serializable {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private User user;
 
-	 
+
 
 	
 	//bi-directional many-to-one association to Purchase
@@ -140,6 +140,6 @@ public class MonthlyBudget implements Serializable {
 		this.purchases = purchases;
 	}
 
- 
+
 
 }

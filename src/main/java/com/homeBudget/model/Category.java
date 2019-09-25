@@ -65,9 +65,9 @@ public class Category  {
 	@OneToMany(mappedBy="category",fetch = FetchType.LAZY)
 	private List<CategoryHistory> categoryHistories;
 	//bi-directional many-to-one association to User
-	
-	@JsonIgnore 
-	@ManyToOne(fetch = FetchType.LAZY)
+
+	@JsonIgnore
+	@ManyToOne(fetch = FetchType.EAGER)
 	private User user;
 	
 	public User getUser() {

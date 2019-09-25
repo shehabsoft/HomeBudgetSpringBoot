@@ -12,8 +12,9 @@ import com.homeBudget.model.MonthlyBudget;
 import com.homeBudget.model.User;
 @Transactional
 public interface CategoryDAO  extends CrudRepository<Category, Integer>{
-   public List<Category> findByMonthlyBudgetsAndUserAndCategoryTypeId(MonthlyBudget monthlyBudget,User user,int categoryTypeId);
+
    public List<Category> findByUserAndCategoryTypeId(User user,int categoryTypeId);
+
    
   
 }

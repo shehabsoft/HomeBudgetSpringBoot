@@ -1,5 +1,7 @@
 package com.homeBudget.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.io.Serializable;
 import javax.persistence.*;
 import java.util.Date;
@@ -41,21 +43,27 @@ public class User implements Serializable {
 	@Column(name="status_id")
 	private int statusId;
 
-	 
-	 
+
+
 	//bi-directional many-to-one association to MonthlyBudget
+	@JsonIgnore
 	@OneToMany(mappedBy="user",fetch = FetchType.LAZY)
 	private List<MonthlyBudget> monthlyBudgets;
 
 
 	//bi-directional many-to-one association to Country
+	@JsonIgnore
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Country country;
 
 	//bi-directional many-to-one association to Currency
+	@JsonIgnore
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Currency currency;
 
+	@JsonIgnore
+	@OneToMany(fetch = FetchType.EAGER)
+	private List<Category> categoryList;
 	public User() {
 	}
 
@@ -168,5 +176,12 @@ public class User implements Serializable {
 	public void setCurrency(Currency currency) {
 		this.currency = currency;
 	}
- 
+
+	public List<Category> getCategoryList() {
+		return categoryList;
+	}
+
+	public void setCategoryList(List<Category> categoryList) {
+		this.categoryList = categoryList;
+	}
 }

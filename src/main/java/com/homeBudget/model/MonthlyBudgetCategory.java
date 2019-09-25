@@ -9,7 +9,9 @@ import javax.persistence.*;
  * 
  */
 @Entity
-@Table(name="monthly_budget_categories")
+
+@Table(name="monthly_budget_category")
+@NamedQueries({@NamedQuery(name="getByMonthlyBudget", query="SELECT m FROM MonthlyBudgetCategory m, Category c  where m.category.id=c.id and  m.monthlyBudget.id=:id and c.categoryTypeId=:categoryTypeId")})
 public class MonthlyBudgetCategory implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -32,6 +34,7 @@ public class MonthlyBudgetCategory implements Serializable {
 
 	//bi-directional many-to-one association to MonthlyBudget
 	@ManyToOne
+	@JoinColumn(name="MonthlyBudget_ID")
 	private MonthlyBudget monthlyBudget;
 
 	public MonthlyBudgetCategory() {

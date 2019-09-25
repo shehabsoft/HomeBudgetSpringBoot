@@ -1,5 +1,7 @@
 package com.homeBudget.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.io.Serializable;
 import javax.persistence.*;
 import java.util.List;
@@ -23,11 +25,11 @@ public class Location implements Serializable {
 
 	@Column(name="english_name")
 	private String englishName;
-
+    @JsonIgnore
 	//bi-directional many-to-one association to Purchase
 	@OneToMany(mappedBy="location")
 	private List<Purchase> purchases;
-
+	@JsonIgnore
 	//bi-directional many-to-one association to PurchaseHistory
 	@OneToMany(mappedBy="location")
 	private List<PurchaseHistory> purchaseHistories;

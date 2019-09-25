@@ -1,11 +1,22 @@
 package com.homeBudget.restControllers;
 
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import com.homeBudget.dao.*;
+import com.homeBudget.exception.CategoryConstraintViolationException;
+import com.homeBudget.exception.CategoryNotFoundException;
+import com.homeBudget.exception.MonthlyBudgetNotFoundException;
+import com.homeBudget.exception.UserNotFoundException;
+import com.homeBudget.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,18 +24,16 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import org.springframework.web.bind.annotation.RestController;
 
-import com.homeBudget.dao.CategoryDAO;
-import com.homeBudget.dao.MonthlyBudgetDAO;
-import com.homeBudget.dao.UserDAO;
-import com.homeBudget.model.Category;
-import com.homeBudget.model.MonthlyBudget;
-import com.homeBudget.model.User;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 public class CategoryController {
 
 	@Autowired
 	private CategoryDAO categotyDao;
+
+	@Autowired
+	private CategoryHistoryDAO categoryHistoryDAO;
 	
 	@Autowired
 	private UserDAO userDAO;
@@ -32,49 +41,61 @@ public class CategoryController {
 	@Autowired
 	private MonthlyBudgetDAO monthlyBudgetDAO;
 
-	/*@RequestMapping(value = "/Category/get/{id}", method = RequestMethod.GET)
-	public ResponseEntity<Category> getById(@PathVariable("id") int id) {
+	@Autowired
+	private MonthlyBudgetCategoryDAO monthlyBudgetCategoryDAO;
+
+	@Autowired
+	private MonthlyBudgetCategoryCustomDAO monthlyBudgetCategoryCustomDAO;
+
+	@RequestMapping(value = "/Category/{id}", method = RequestMethod.GET)
+	public  ResponseEntity<Category>  getById(@PathVariable("id") Integer id) throws CategoryNotFoundException {
 		try {
 			Category category = categotyDao.findById(id).get();
 			if (category == null) {
 				System.out.println("Unable to delete. User with id " + id + " not found");
-				return new ResponseEntity<Category>(HttpStatus.NOT_FOUND);
+				return new ResponseEntity<Category>(HttpStatus.NOT_FOUND) ;
 			}
-			return new ResponseEntity<Category>(category, HttpStatus.OK);
+			return new ResponseEntity<Category>(category,HttpStatus.FOUND) ;
 
 		} catch (Exception ex) {
-			ex.printStackTrace();
-			return null;
+			throw new  CategoryNotFoundException(ex.getMessage());
+
 		}
-	}*/
-	
-	@RequestMapping(value = "/Category/get/{id}", method = RequestMethod.GET)
-	public  Category  getById(@PathVariable("id") int id) {
-		try {
-			Category category = categotyDao.findById(id).get();
-			if (category == null) {
-				System.out.println("Unable to delete. User with id " + id + " not found");
-				//return new ResponseEntity<Category>(HttpStatus.NOT_FOUND);
-				return null;
-			}
-			return  category ;
+	}
 
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			return null;
+	@Transactional(isolation = Isolation.SERIALIZABLE)
+	@RequestMapping(value = "/Category/", method = RequestMethod.POST)
+	public ResponseEntity<Object> create(@RequestBody Category category) throws CategoryNotFoundException{
+
+		if (category != null) {
+			System.out.println("Creating User " + category.getArabicDescription());
+
+			Category category1 = categotyDao.save(category);
+			CategoryHistory categoryHistory=new CategoryHistory();
+			categoryHistory.setActualValue(category1.getActualValue());
+			categoryHistory.setCategoryStatus(category1.getCategoryStatus());
+			categoryHistory.setCategory(category1);
+			categoryHistory.setCategoryTypeId(category1.getCategoryTypeId());
+			categoryHistory.setLimitValue(category1.getLimitValue());
+			categoryHistory.setPlanedValue(category1.getPlanedValue());
+			categoryHistory.setUserId(category1.getUser().getId());
+			categoryHistory.setActualValue(category1.getActualValue());
+			categoryHistory.setCreationDate(new Date());
+			categoryHistoryDAO.save(categoryHistory);
+
+			URI location = ServletUriComponentsBuilder.fromCurrentRequest().path(
+					"/{id}").buildAndExpand(category1.getId()).toUri();
+			return ResponseEntity.created(location).build();
+		}else
+		{
+			 throw new CategoryNotFoundException("please privide Category In Request Body");
+
 		}
-	} 
 
-	@RequestMapping(value = "/Category/add", method = RequestMethod.POST)
-	public ResponseEntity<Category> create(@RequestBody Category category) {
-		System.out.println("Creating User " + category.getArabicDescription());
-
-		Category category1 = categotyDao.save(category);
-		return new ResponseEntity<Category>(category1, HttpStatus.OK);
 
 	}
 
-	@RequestMapping(value = "/Category/update/{id}", method = RequestMethod.PUT)
+	@RequestMapping(value = "/Category/{id}", method = RequestMethod.PUT)
 	public ResponseEntity<Category> update(@PathVariable("id") int id, @RequestBody Category category) {
 
 		Category currentCategoty = categotyDao.findById(id).get();
@@ -89,39 +110,30 @@ public class CategoryController {
 		currentCategoty.setPlanedValue(category.getPlanedValue());
 		currentCategoty.setActualValue(category.getActualValue());
 		currentCategoty.setLimitValue(category.getLimitValue());
-
+		categotyDao.save(currentCategoty);
 		return new ResponseEntity<Category>(currentCategoty, HttpStatus.OK);
 	}
 
-	@RequestMapping(value = "/Category/delete/{id}", method = RequestMethod.DELETE)
-	public ResponseEntity<Category> delete(@PathVariable("id") int id) {
+	@RequestMapping(value = "/Category/{id}", method = RequestMethod.DELETE)
+	public ResponseEntity<Category> delete(@PathVariable("id") int id)throws CategoryNotFoundException,CategoryConstraintViolationException {
 		System.out.println("Fetching & Deleting User with id " + id);
 
 		Category user = categotyDao.findById(id).get();
 		if (user == null) {
-			System.out.println("Unable to delete. Category with id " + id + " not found");
-			return new ResponseEntity<Category>(HttpStatus.NOT_FOUND);
+		 throw new CategoryNotFoundException("Unable to delete. Category with id \" + id + \" not found");
 		}
-
-		categotyDao.deleteById(id);
-		return new ResponseEntity<Category>(HttpStatus.NO_CONTENT);
+			try {
+				categotyDao.deleteById(id);
+				return new ResponseEntity<Category>(HttpStatus.FOUND);
+			}catch (Exception ex)
+			{
+				throw new CategoryConstraintViolationException(ex.getMessage());
+			}
 	}
 
-	@RequestMapping(value = "/Category/get", method = RequestMethod.GET)
-	public ResponseEntity<List<Category>> getAllCategories() {
-		List<Category> categories = (List<Category>) categotyDao.findAll();
-		if (categories.isEmpty()) {
-			return new ResponseEntity<List<Category>>(HttpStatus.NO_CONTENT);// You
-																				// many
-																				// decide
-																				// to
-																				// return
-																				// HttpStatus.NOT_FOUND
-		}
-		return new ResponseEntity<List<Category>>(categories, HttpStatus.OK);
-	}
-	@RequestMapping(value = "/Category/getAllExpensesCategoriesByUserId/{userId}", method = RequestMethod.GET)
-	public ResponseEntity<List<Category>> getAllExpensesCategoriesByUserId(@PathVariable("userId")int userId)
+
+	@RequestMapping(value = "/Category/User/{userId}/{categoryType}", method = RequestMethod.GET)
+	public ResponseEntity<List<Category>> getAllCategoriesByUserIdAndCategoryType(@PathVariable("userId")int userId,@PathVariable("categoryType")int categoryType)throws CategoryNotFoundException
 	{
 		List<Category> categories=null;
 		User user=userDAO.findById(userId).get();
@@ -129,27 +141,19 @@ public class CategoryController {
 			System.out.println("Unable to get All Expenses Categories ByU serId Category with id " + userId + " not found");
 			return new ResponseEntity<List<Category>>(HttpStatus.NOT_FOUND);
 		}
-		 categories = (List<Category>) categotyDao.findByUserAndCategoryTypeId(user, 1);//1 for expenses Categories 
-		
-		 return new ResponseEntity<List<Category>>(categories, HttpStatus.OK);
-	}
-	
-	@RequestMapping(value = "/Category/getAllBudgetCategories/{userId}", method = RequestMethod.GET)
-	public ResponseEntity<List<Category>> getAllBudgetCategoriesByUserId(@PathVariable("userId")int userId)
-	{
-		List<Category> categories=null;
-		User user=userDAO.findById(userId).get();
-		if (user == null) {
-			System.out.println("Unable to get All Income Categories ByU serId Category with id " + userId + " not found");
-			return new ResponseEntity<List<Category>>(HttpStatus.NOT_FOUND);
+		categories = (List<Category>) categotyDao.findByUserAndCategoryTypeId(user, categoryType);//1 for expenses Categories
+		if(categories==null)
+		{
+			throw new CategoryNotFoundException("There is not Categories with type :"+categoryType+" For User ID :"+userId);
+		}else {
+			return new ResponseEntity<List<Category>>(categories, HttpStatus.OK);
 		}
-		 categories = (List<Category>) categotyDao.findByUserAndCategoryTypeId(user, 2);//1 for expenses Categories 
-		
-		 return new ResponseEntity<List<Category>>(categories, HttpStatus.OK);
 	}
+
+
 	
-	@RequestMapping(value = "/Category/getBudgetCategories/{userId}/{monthlyBudgetId}", method = RequestMethod.GET)
-	public ResponseEntity<List<Category>> getBudgetCategoriesByUserId(@PathVariable("userId")int userId,@PathVariable("monthlyBudgetId")int monthlyBudgetId)
+	@RequestMapping(value = "/Category/MonthlyBudget/{monthlyBudgetId}/User/{userId}/{categoryType}", method = RequestMethod.GET)
+	public ResponseEntity<List<Category>> getCategoriesByMonthlyBudgetUserIdCategoryId(@PathVariable("userId")Integer userId,@PathVariable("monthlyBudgetId")Integer monthlyBudgetId,@PathVariable("categoryType")Integer categoryType)throws Exception
 	{
 		List<Category> categories=null;
 		
@@ -161,36 +165,26 @@ public class CategoryController {
 		 user=	userDAO.findById(userId);
 		}
 		if (user == null) {
-			System.out.println("Unable to get All Income Categories ByU serId Category with id " + userId + " not found");
-			return new ResponseEntity<List<Category>>(HttpStatus.NOT_FOUND);
+			 throw new UserNotFoundException("User is Not Found with ID :"+userId);
 		}
 		MonthlyBudget monthlyBudget=monthlyBudgetDAO.findById(monthlyBudgetId).get();
 		if (monthlyBudget == null) {
-			System.out.println("Unable to get monthlyBudget ByU serId monthlyBudget with id " + monthlyBudgetId + " not found");
-			return new ResponseEntity<List<Category>>(HttpStatus.NOT_FOUND);
+			throw new MonthlyBudgetNotFoundException("User is Not Found with ID :"+userId);
 		}
-		 categories = (List<Category>) categotyDao.findByMonthlyBudgetsAndUserAndCategoryTypeId(monthlyBudget, user.get(), 2);//1 for expenses Categories 
-		
+
+		List<MonthlyBudgetCategory>  monthlyBudgetCategory = (List<MonthlyBudgetCategory>) monthlyBudgetCategoryCustomDAO.findByMonthlyBudget(monthlyBudget,categoryType);//1 for expenses Categories
+		if(monthlyBudgetCategory.size()==0)
+		{
+			throw new CategoryNotFoundException("There is No Categories for Monthly Budget "+monthlyBudgetId +" and User ID :"+userId);
+		}
+		categories=new ArrayList<>();
+		 for(int i=0;i<monthlyBudgetCategory.size();i++)
+		 {
+			 categories.add(monthlyBudgetCategory.get(i).getCategory());
+		 }
 		 return new ResponseEntity<List<Category>>(categories, HttpStatus.OK);
 	}
-	@RequestMapping(value = "/Category/getExpensesCategories/{userId}/{monthlyBudgetId}", method = RequestMethod.GET)
-	public ResponseEntity<List<Category>> getExpensesCategoriesByUserId(@PathVariable("userId")int userId,@PathVariable("monthlyBudgetId")int monthlyBudgetId)
-	{
-		List<Category> categories=null;
-		User user=userDAO.findById(userId).get();
-		if (user == null) {
-			System.out.println("Unable to get All Income Categories ByU serId Category with id " + userId + " not found");
-			return new ResponseEntity<List<Category>>(HttpStatus.NOT_FOUND);
-		}
-		MonthlyBudget monthlyBudget=monthlyBudgetDAO.findById(monthlyBudgetId).get();
-		if (monthlyBudget == null) {
-			System.out.println("Unable to get monthlyBudget ByU serId monthlyBudget with id " + monthlyBudgetId + " not found");
-			return new ResponseEntity<List<Category>>(HttpStatus.NOT_FOUND);
-		}
-		 categories = (List<Category>) categotyDao.findByMonthlyBudgetsAndUserAndCategoryTypeId(monthlyBudget, user, 1);//1 for expenses Categories 
-		
-		 return new ResponseEntity<List<Category>>(categories, HttpStatus.OK);
-	}
+
 
 
 }
