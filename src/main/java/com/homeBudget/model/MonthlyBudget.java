@@ -46,14 +46,14 @@ public class MonthlyBudget implements Serializable {
 	private List<Category> categories;
 
 	//bi-directional many-to-one association to User
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	private User user;
 
 
 
 	
 	//bi-directional many-to-one association to Purchase
-	@OneToMany(mappedBy="monthlyBudget",fetch = FetchType.LAZY)
+	@OneToMany(fetch = FetchType.LAZY)
 	private List<Purchase> purchases;
 	
 	

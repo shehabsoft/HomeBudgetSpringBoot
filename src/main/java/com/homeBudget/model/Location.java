@@ -25,7 +25,7 @@ public class Location implements Serializable {
 
 	@Column(name="english_name")
 	private String englishName;
-    @JsonIgnore
+
 	//bi-directional many-to-one association to Purchase
 	@OneToMany(mappedBy="location")
 	private List<Purchase> purchases;

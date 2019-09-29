@@ -13,6 +13,7 @@ import java.util.List;
  * 
  */
 @Entity
+@Table(name="purchase")
 @NamedQuery(name="Purchase.findAll", query="SELECT p FROM Purchase p")
 public class Purchase implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -49,8 +50,9 @@ public class Purchase implements Serializable {
 	private Category category;
 
 	//bi-directional many-to-one association to Location
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.EAGER)
 	private Location location;
+
 
 	@ManyToOne
 	private MonthlyBudget monthlyBudget;
