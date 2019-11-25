@@ -9,4 +9,7 @@ import com.homeBudget.model.User;
 @Transactional
 public interface UserDAO  extends CrudRepository<User, Integer>{
 
+    public User findByEmail(String email);
+
+
 }

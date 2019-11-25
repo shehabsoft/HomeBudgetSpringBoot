@@ -50,7 +50,7 @@ public class Purchase implements Serializable {
 	private Category category;
 
 	//bi-directional many-to-one association to Location
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne
 	private Location location;
 
 
@@ -125,6 +125,7 @@ public class Purchase implements Serializable {
 	public ApprovedPurchases getApprovedPurchas() {
 		return this.approvedPurchas;
 	}
+
 	public List<PurchaseHistory> getPurchaseHistories() {
 		return this.purchaseHistories;
 	}

@@ -17,5 +17,6 @@ public interface PurchaseDAO  extends CrudRepository<Purchase, Integer>{
 
     public List<Purchase> findByMonthlyBudgetAndCategory(MonthlyBudget monthlyBudget, Category category);
     public List<Purchase>findByCategory(Category category);
+    List<Purchase> findByMonthlyBudgetAndStatus(MonthlyBudget monthlyBudget,Integer status);
     public List<Purchase> findByMonthlyBudget(MonthlyBudget monthlyBudget);
 }

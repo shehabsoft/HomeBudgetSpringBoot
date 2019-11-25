@@ -1,34 +1,36 @@
 package com.homeBudget.restControllers;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.homeBudget.dao.*;
 import com.homeBudget.exception.CategoryConstraintViolationException;
 import com.homeBudget.exception.CategoryNotFoundException;
 import com.homeBudget.exception.MonthlyBudgetNotFoundException;
 import com.homeBudget.exception.UserNotFoundException;
 import com.homeBudget.model.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 public class CategoryController {
 
+
+	@Autowired
+	private MessageSource messageSource;
 	@Autowired
 	private CategoryDAO categotyDao;
 
@@ -47,6 +49,42 @@ public class CategoryController {
 	@Autowired
 	private MonthlyBudgetCategoryCustomDAO monthlyBudgetCategoryCustomDAO;
 
+
+	@RequestMapping(value = "/Category/Message", method = RequestMethod.GET)
+	public String getMessage(@RequestHeader(name="Accept-Language",required = false) Locale local ) throws CategoryNotFoundException {
+		try {
+    		return messageSource.getMessage("good1.morning.message",null,local);
+
+		} catch (Exception ex) {
+			throw new  CategoryNotFoundException(ex.getMessage());
+
+		}
+	}
+	@RequestMapping(value = "/Category/MessageLocal", method = RequestMethod.GET)
+	public String getMessage1( ) throws CategoryNotFoundException {
+		try {
+			return messageSource.getMessage("good1.morning.message",null, LocaleContextHolder.getLocale());
+
+		} catch (Exception ex) {
+			throw new  CategoryNotFoundException(ex.getMessage());
+
+		}
+	}
+	@RequestMapping(value = "/Category/filtering/{id}", method = RequestMethod.GET)
+	public MappingJacksonValue dynamicFiltering(@PathVariable("id") Integer id ) throws CategoryNotFoundException {
+		try {
+			Category category = categotyDao.findById(id).get();
+			SimpleBeanPropertyFilter simpleBeanPropertyFilter= SimpleBeanPropertyFilter.FilterExceptFilter.filterOutAllExcept("actualValue");
+			FilterProvider filterProvider=new SimpleFilterProvider().addFilter("Category",simpleBeanPropertyFilter);
+			MappingJacksonValue mappingJacksonValue=new MappingJacksonValue(category);
+			mappingJacksonValue.setFilters(filterProvider);
+			return mappingJacksonValue;
+
+		} catch (Exception ex) {
+			throw new  CategoryNotFoundException(ex.getMessage());
+
+		}
+	}
 	@RequestMapping(value = "/Category/{id}", method = RequestMethod.GET)
 	public  ResponseEntity<Category>  getById(@PathVariable("id") Integer id) throws CategoryNotFoundException {
 		try {

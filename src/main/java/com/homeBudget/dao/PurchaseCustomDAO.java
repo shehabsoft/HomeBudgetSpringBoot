@@ -12,6 +12,6 @@ import java.util.List;
 public interface PurchaseCustomDAO  {
 
       List<Purchase> findByMonthlyBudget(MonthlyBudget monthlyBudget);
-
-      List<Purchase> findByMonthlyBudgetAndCategoryId(MonthlyBudget monthlyBudget,Integer categoryId);
+      List<Purchase> findByMonthlyBudgetAndStatus(MonthlyBudget monthlyBudget,Integer status);
+      List<Purchase> findByMonthlyBudgetAndCategoryIdAndStatus(MonthlyBudget monthlyBudget,Integer categoryId,Integer status);
 }

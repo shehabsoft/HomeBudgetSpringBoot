@@ -43,6 +43,10 @@ public class User implements Serializable {
 	@Column(name="status_id")
 	private int statusId;
 
+	@Column(name="token")
+	private String token;
+
+
 
 
 	//bi-directional many-to-one association to MonthlyBudget
@@ -183,5 +187,13 @@ public class User implements Serializable {
 
 	public void setCategoryList(List<Category> categoryList) {
 		this.categoryList = categoryList;
+	}
+
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
 	}
 }

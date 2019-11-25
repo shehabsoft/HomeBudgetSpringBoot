@@ -136,8 +136,8 @@ public class PurchaseController {
 	}
 
 
-	@RequestMapping(value = "/Purchase/MonthlyBudget/{monthlyBudgetId}/User/{userId}", method = RequestMethod.GET)
-	public ResponseEntity<List<Purchase>> getAllPurchaseByMonthlyBudget(@PathVariable("monthlyBudgetId") Integer monthlyBudgetId ,@PathVariable("userId") Integer userId)throws MonthlyBudgetNotFoundException,CategoryNotFoundException,PurchaseNotFoundException,UserNotFoundException
+	@RequestMapping(value = "/Purchase/MonthlyBudget/{monthlyBudgetId}/User/{userId}/{status}/", method = RequestMethod.GET)
+	public ResponseEntity<List<Purchase>> getAllPurchaseByMonthlyBudget(@PathVariable("monthlyBudgetId") Integer monthlyBudgetId ,@PathVariable("userId") Integer userId,@PathVariable("status") Integer status)throws MonthlyBudgetNotFoundException,CategoryNotFoundException,PurchaseNotFoundException,UserNotFoundException
 	{
         MonthlyBudget monthlyBudget=monthlyBudgetDAO.findById(monthlyBudgetId).get();
         if (monthlyBudget == null) {
@@ -148,16 +148,20 @@ public class PurchaseController {
         {
             throw new UserNotFoundException("Null Monthly Budget");
         }
-        List<Purchase> purchases = (List<Purchase>) purchaseCustomDAO.findByMonthlyBudget(monthlyBudget);//1 for expenses Categories
-		if(purchases==null)
+		if(status==null)
+		{
+			throw new PurchaseNotFoundException("Status can not be null");
+		}
+        List<Purchase> purchases = (List<Purchase>) purchaseCustomDAO.findByMonthlyBudgetAndStatus(monthlyBudget,status);//1 for expenses Categories
+		if(purchases.size()==0)
 		{
 			throw new PurchaseNotFoundException("There is not Purcha");
 		}else {
 			return new ResponseEntity<List<Purchase>>(purchases, HttpStatus.OK);
 		}
 	}
-	@RequestMapping(value = "/Purchase/MonthlyBudget/{monthlyBudgetId}/Category/{categoryId}/User/{userId}", method = RequestMethod.GET)
-	public ResponseEntity<List<Purchase>> getAllPurchaseByMonthlyBudgetAndCategoryId(@PathVariable("monthlyBudgetId") Integer monthlyBudgetId ,@PathVariable("userId") Integer userId,@PathVariable("categoryId") Integer categoryId)throws MonthlyBudgetNotFoundException,CategoryNotFoundException,PurchaseNotFoundException,UserNotFoundException
+	@RequestMapping(value = "/Purchase/MonthlyBudget/{monthlyBudgetId}/Category/{categoryId}/User/{userId}/{status}/", method = RequestMethod.GET)
+	public ResponseEntity<List<Purchase>> getAllPurchaseByMonthlyBudgetAndCategoryId(@PathVariable("monthlyBudgetId") Integer monthlyBudgetId ,@PathVariable("userId") Integer userId,@PathVariable("categoryId")Integer categoryId,@PathVariable("status") Integer status) throws MonthlyBudgetNotFoundException,CategoryNotFoundException,PurchaseNotFoundException,UserNotFoundException
 	{
 		MonthlyBudget monthlyBudget=monthlyBudgetDAO.findById(monthlyBudgetId).get();
 		if (monthlyBudget == null) {
@@ -168,23 +172,30 @@ public class PurchaseController {
 		{
 			throw new UserNotFoundException("Null Monthly Budget");
 		}
-		List<Purchase> purchases = (List<Purchase>) purchaseCustomDAO.findByMonthlyBudgetAndCategoryId(monthlyBudget,categoryId);//1 for expenses Categories
-		if(purchases==null)
+		if(status==null)
+		{
+			throw new PurchaseNotFoundException("Status can not be null");
+		}
+		List<Purchase> purchases = (List<Purchase>) purchaseCustomDAO.findByMonthlyBudgetAndCategoryIdAndStatus(monthlyBudget,categoryId,status);//1 for expenses Categories
+		if(purchases.size()==0)
 		{
 			throw new PurchaseNotFoundException("There is not Purcha");
 		}else {
 			return new ResponseEntity<List<Purchase>>(purchases, HttpStatus.OK);
 		}
 	}
-    @RequestMapping(value = "/Purchase/MonthlyBudget/{monthlyBudgetId}/", method = RequestMethod.GET)
-    public ResponseEntity<List<Purchase>> getAllPurchaseByMonthlyBudget(@PathVariable("monthlyBudgetId") Integer monthlyBudgetId )throws MonthlyBudgetNotFoundException,CategoryNotFoundException,PurchaseNotFoundException
+    @RequestMapping(value = "/Purchase/MonthlyBudget/{monthlyBudgetId}/{status}/", method = RequestMethod.GET)
+    public ResponseEntity<List<Purchase>> getAllPurchaseByMonthlyBudget(@PathVariable("monthlyBudgetId") Integer monthlyBudgetId,@PathVariable("status") Integer status )throws MonthlyBudgetNotFoundException,CategoryNotFoundException,PurchaseNotFoundException
     {
         MonthlyBudget monthlyBudget=monthlyBudgetDAO.findById(monthlyBudgetId).get();
         if (monthlyBudget == null) {
             throw new MonthlyBudgetNotFoundException("Null Monthly Budget");
         }
-
-        List<Purchase> purchases = (List<Purchase>) purchaseCustomDAO.findByMonthlyBudget(monthlyBudget);//1 for expenses Categories
+		if(status==null)
+		{
+			throw new PurchaseNotFoundException("Status can not be null");
+		}
+        List<Purchase> purchases = (List<Purchase>) purchaseCustomDAO.findByMonthlyBudgetAndStatus(monthlyBudget,status);//1 for expenses Categories
         if(purchases.size()==0)
         {
             throw new PurchaseNotFoundException("There is not Purchases with type For User I ");

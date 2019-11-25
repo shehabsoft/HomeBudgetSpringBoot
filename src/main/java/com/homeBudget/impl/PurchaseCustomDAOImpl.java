@@ -47,11 +47,34 @@ public class PurchaseCustomDAOImpl implements PurchaseCustomDAO {
 
         return purchases;
     }
-    public List<Purchase> findByMonthlyBudgetAndCategoryId(MonthlyBudget monthlyBudget,Integer categoryId)
+    public List<Purchase> findByMonthlyBudgetAndStatus(MonthlyBudget monthlyBudget,Integer status)
     {
-        Query query = entityManager.createNativeQuery("SELECT ID FROM   purchase where monthlyBudget_ID = ? and category_id =?");
+        Query query = entityManager.createNativeQuery("SELECT ID FROM   purchase where monthlyBudget_ID = ? and status= ?");
+        query.setParameter(1, monthlyBudget.getId());
+        query.setParameter(2, status);
+
+        List<Object> result = query.getResultList();
+        Iterator itr = result.iterator();
+        List<Purchase> purchases = new ArrayList<>();
+        while (itr.hasNext()) {
+            Purchase purchase = new Purchase();
+            Integer id = (Integer) itr.next();
+
+            purchase = entityManager.find(Purchase.class, id);
+
+
+            purchases.add(purchase);
+
+        }
+
+        return purchases;
+    }
+    public List<Purchase> findByMonthlyBudgetAndCategoryIdAndStatus(MonthlyBudget monthlyBudget,Integer categoryId,Integer status)
+    {
+        Query query = entityManager.createNativeQuery("SELECT ID FROM   purchase where monthlyBudget_ID = ? and category_id =? and status= ?");
         query.setParameter(1, monthlyBudget.getId());
         query.setParameter(2, categoryId);
+        query.setParameter(3, status);
 
         List<Object> result = query.getResultList();
         Iterator itr = result.iterator();
