@@ -18,40 +18,41 @@ public class User implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@SequenceGenerator(name="USERS_ID_GENERATOR", sequenceName="SEQ")
-	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="USERS_ID_GENERATOR")
+	@SequenceGenerator(name = "USERS_ID_GENERATOR", sequenceName = "SEQ")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "USERS_ID_GENERATOR")
 	private int id;
 
 	private String address;
 
-	
-	@Column(name="creation_date")
+
+	@Column(name = "creation_date")
 	private Date creationDate;
 
 	private String email;
 
-	@Column(name="gender_id")
+	@Column(name = "gender_id")
 	private int genderId;
 
-	@Column(name="mobile_number")
+	@Column(name = "mobile_number")
 	private int mobileNumber;
 
 	private String name;
 
 	private String password;
 
-	@Column(name="status_id")
+	@Column(name = "status_id")
 	private int statusId;
 
-	@Column(name="token")
+	@Column(name = "token")
 	private String token;
 
-
+	@Column(name = "admin")
+	private Boolean admin;
 
 
 	//bi-directional many-to-one association to MonthlyBudget
 	@JsonIgnore
-	@OneToMany(mappedBy="user",fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
 	private List<MonthlyBudget> monthlyBudgets;
 
 
@@ -68,6 +69,7 @@ public class User implements Serializable {
 	@JsonIgnore
 	@OneToMany(fetch = FetchType.EAGER)
 	private List<Category> categoryList;
+
 	public User() {
 	}
 
@@ -195,5 +197,13 @@ public class User implements Serializable {
 
 	public void setToken(String token) {
 		this.token = token;
+	}
+
+	public Boolean getAdmin() {
+		return admin;
+	}
+
+	public void setAdmin(Boolean admin) {
+		this.admin = admin;
 	}
 }

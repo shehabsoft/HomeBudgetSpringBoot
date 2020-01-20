@@ -56,12 +56,12 @@ public class UserController {
 
 				String token = UUID.randomUUID().toString();
 				user1.setToken(token);
-				userDao.save(user1);
+				user1=userDao.save(user1);
 				return new ResponseEntity<User>(user1, HttpStatus.OK);
 			}
 			else
 			{
-				throw new  UserNotFoundException("Invalid Email and Password");
+				throw new  UserNotFoundException("Invalid Credentioals");
 			}
 
 		} catch (Exception ex) {

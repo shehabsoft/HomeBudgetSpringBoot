@@ -4,6 +4,7 @@ import com.homeBudget.dao.ProductDAO;
 import com.homeBudget.exception.ProductConstraintViolationException;
 import com.homeBudget.exception.ProductNotFoundException;
 import com.homeBudget.exception.ProductNotFoundException;
+import com.homeBudget.model.OrdersProduct;
 import com.homeBudget.model.Product;
 import com.homeBudget.model.Product;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,16 +65,17 @@ public class ProductController {
 
 	@Transactional(isolation = Isolation.SERIALIZABLE)
 	@RequestMapping(value = "/Product/", method = RequestMethod.POST)
-	public ResponseEntity<Object> create(@RequestBody Product location) throws ProductNotFoundException{
+	public ResponseEntity<Product> create(@RequestBody Product location) throws ProductNotFoundException{
 
 		if (location != null) {
 
 
 			Product location1 = productDao.save(location);
 
-			URI locationU = ServletUriComponentsBuilder.fromCurrentRequest().path(
-					"/{id}").buildAndExpand(location1.getId()).toUri();
-			return ResponseEntity.created(locationU).build();
+//			URI locationU = ServletUriComponentsBuilder.fromCurrentRequest().path(
+//					"/{id}").buildAndExpand(location1.getId()).toUri();
+		//	return ResponseEntity.created(locationU).build();
+			return new ResponseEntity<Product>(location1,HttpStatus.OK) ;
 		}else
 		{
 			 throw new ProductNotFoundException("please privide Product In Request Body");
@@ -112,7 +114,7 @@ public class ProductController {
 		}
 			try {
 				productDao.deleteById(id);
-				return new ResponseEntity<Product>(HttpStatus.FOUND);
+				return new ResponseEntity<Product>(HttpStatus.OK);
 			}catch (Exception ex)
 			{
 				throw new ProductConstraintViolationException(ex.getMessage());

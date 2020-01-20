@@ -24,9 +24,7 @@ public class Country implements Serializable {
 	@Column(name="english_name")
 	private String englishName;
 
-	//bi-directional many-to-one association to User
-	@OneToMany(mappedBy="country")
-	private List<User> users;
+
 
 	public Country() {
 	}
@@ -55,26 +53,9 @@ public class Country implements Serializable {
 		this.englishName = englishName;
 	}
 
-	public List<User> getUsers() {
-		return this.users;
-	}
 
-	public void setUsers(List<User> users) {
-		this.users = users;
-	}
 
-	public User addUser(User user) {
-		getUsers().add(user);
-		user.setCountry(this);
 
-		return user;
-	}
 
-	public User removeUser(User user) {
-		getUsers().remove(user);
-		user.setCountry(null);
-
-		return user;
-	}
 
 }
