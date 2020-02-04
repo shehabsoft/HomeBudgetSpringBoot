@@ -1,9 +1,11 @@
 package com.homeBudget.restControllers;
 
+import com.homeBudget.dao.CleaningFeeDAO;
 import com.homeBudget.dao.OrderDAO;
 import com.homeBudget.dao.OrdersProductDAO;
 import com.homeBudget.exception.OrderConstraintViolationException;
 import com.homeBudget.exception.OrderNotFoundException;
+import com.homeBudget.model.CleaningFee;
 import com.homeBudget.model.Order;
 import com.homeBudget.model.OrdersProduct;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,8 @@ public class OrderController {
 	private OrderDAO orderDao;
 	@Autowired
 	private OrdersProductDAO orderProductDao;
+	@Autowired
+	private CleaningFeeDAO cleaningFeeDAO;
 
 
 	@RequestMapping(value = "/Order/{id}", method = RequestMethod.GET)
@@ -68,9 +72,10 @@ public class OrderController {
 	public ResponseEntity<Order> create(@RequestBody Order order) throws OrderNotFoundException{
 
 		if (order != null&&order.getOrdersProducts()!=null&&order.getUser()!=null) {
-
+			order.setTotal(order.getTotal()+30);
 			order.setCreationDate(new Date());
 			order.setPhoneNumber("02"+order.getUser().getMobileNumber());
+			order.setUpdateDate(new Date());
 			Order order1 = orderDao.save(order);
             List<OrdersProduct>ordersProducts=order.getOrdersProducts();
 
@@ -78,7 +83,19 @@ public class OrderController {
 				 OrdersProduct  ordersProduct=ordersProducts.get(i);
 				 ordersProduct.setCreationDate(new Date());
 				 ordersProduct.setOrder(order1);
+				 if( ordersProduct.getCleaningFeeId()!=null) {
+					 try {
+						 CleaningFee cleaningFee = cleaningFeeDAO.findById(ordersProduct.getCleaningFeeId()).get();
+						 ordersProduct.setCleaningFee(cleaningFee);
+					 }catch (Exception e)
+					 {
+						// e.printStackTrace();
+					 }
+				 }
+
 				 orderProductDao.save(ordersProducts.get(i));
+
+
 			 }
 //			URI locationU = ServletUriComponentsBuilder.fromCurrentRequest().path(
 //					"/{id}").buildAndExpand(location1.getId()).toUri();
@@ -106,6 +123,7 @@ public class OrderController {
 
 
 		currentOrder1=location;
+		currentOrder1.setUpdateDate(new Date());
 	    Order product=orderDao.save(currentOrder1);
 
 

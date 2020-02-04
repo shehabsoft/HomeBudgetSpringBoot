@@ -36,6 +36,9 @@ public class Product implements Serializable {
 	@Column(name="name_en")
 	private String nameEn;
 
+	@Column(name="category")
+	private String category;
+
 	private double price;
 
 	@JsonIgnore
@@ -122,5 +125,13 @@ public class Product implements Serializable {
 
 	public void setImgData(Byte[] imgData) {
 		this.imgData = imgData;
+	}
+
+	public String getCategory() {
+		return category;
+	}
+
+	public void setCategory(String category) {
+		this.category = category;
 	}
 }

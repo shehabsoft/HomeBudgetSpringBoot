@@ -27,6 +27,8 @@ public class OrdersProduct implements Serializable {
 	private Date creationDate;
 
 	private double quantity;
+    @Transient
+	private Integer cleaningFeeId;
 
 	private int status;
 
@@ -34,6 +36,11 @@ public class OrdersProduct implements Serializable {
 	@JsonIgnore
 	@ManyToOne
 	private Order order;
+
+
+
+	@ManyToOne
+	private CleaningFee cleaningFee;
 
 	//bi-directional many-to-one association to Product
 	@ManyToOne
@@ -90,4 +97,19 @@ public class OrdersProduct implements Serializable {
 		this.product = product;
 	}
 
+	public CleaningFee getCleaningFee() {
+		return cleaningFee;
+	}
+
+	public void setCleaningFee(CleaningFee cleaningFee) {
+		this.cleaningFee = cleaningFee;
+	}
+
+	public Integer getCleaningFeeId() {
+		return cleaningFeeId;
+	}
+
+	public void setCleaningFeeId(Integer cleaningFeeId) {
+		this.cleaningFeeId = cleaningFeeId;
+	}
 }

@@ -1,12 +1,14 @@
 package com.homeBudget.restControllers;
 
 import com.homeBudget.dao.ProductDAO;
+import com.homeBudget.dao.ProductSellerDAO;
 import com.homeBudget.exception.ProductConstraintViolationException;
 import com.homeBudget.exception.ProductNotFoundException;
 import com.homeBudget.exception.ProductNotFoundException;
 import com.homeBudget.model.OrdersProduct;
 import com.homeBudget.model.Product;
 import com.homeBudget.model.Product;
+import com.homeBudget.model.ProductsSeller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +28,9 @@ public class ProductController {
 	@Autowired
 	private ProductDAO productDao;
 
+	@Autowired
+	private ProductSellerDAO productSellerDAO;
+
 
 	@RequestMapping(value = "/Product/{id}", method = RequestMethod.GET)
 	public  ResponseEntity<Product>  getById(@PathVariable("id") Integer id) throws ProductNotFoundException {
@@ -43,19 +48,19 @@ public class ProductController {
 		}
 	}
 	@RequestMapping(value = "/Product/", method = RequestMethod.GET)
-	public  ResponseEntity<List<Product>>  getAll() throws ProductNotFoundException {
+	public  ResponseEntity<List<ProductsSeller>>  getAll() throws ProductNotFoundException {
 		try {
-			Iterator<Product> category = productDao.findAll().iterator();
-			List<Product>productList=new ArrayList<>();
-			if (category == null) {
+			Iterator<ProductsSeller> productsSellerIterator = productSellerDAO.findAll().iterator();
+			List<ProductsSeller>productsSellersList=new ArrayList<>();
+			if (productsSellerIterator == null) {
 
 				return new ResponseEntity(HttpStatus.NOT_FOUND) ;
 			}
-		     while(category.hasNext())
+		     while(productsSellerIterator.hasNext())
 			 {
-				 productList.add(category.next());
+				 productsSellersList.add(productsSellerIterator.next());
 			 }
-			return new ResponseEntity<List<Product>>(productList,HttpStatus.OK) ;
+			return new ResponseEntity<List<ProductsSeller>>(productsSellersList,HttpStatus.OK) ;
 
 		} catch (Exception ex) {
 			throw new  ProductNotFoundException(ex.getMessage());
