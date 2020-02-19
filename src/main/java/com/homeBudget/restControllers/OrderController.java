@@ -15,9 +15,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 @RestController
@@ -49,17 +47,14 @@ public class OrderController {
 	@RequestMapping(value = "/Order/", method = RequestMethod.GET)
 	public  ResponseEntity<List<Order>>  getAll() throws OrderNotFoundException {
 		try {
-			Iterator<Order> category = orderDao.findAll().iterator();
-			List<Order>productList=new ArrayList<>();
+				List<Order> category = orderDao.findByStatus(2);
+
 			if (category == null) {
 
 				return new ResponseEntity(HttpStatus.NOT_FOUND) ;
 			}
-		     while(category.hasNext())
-			 {
-				 productList.add(category.next());
-			 }
-			return new ResponseEntity<List<Order>>(productList,HttpStatus.OK) ;
+
+			return new ResponseEntity<List<Order>>(category,HttpStatus.OK) ;
 
 		} catch (Exception ex) {
 			throw new  OrderNotFoundException(ex.getMessage());

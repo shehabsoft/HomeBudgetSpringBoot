@@ -38,7 +38,7 @@ public class Order implements Serializable {
 	@Column(name="phone_number")
 	private String phoneNumber;
 
-	private int status;
+	private Integer status;
 
 	private double total;
 
@@ -109,11 +109,11 @@ public class Order implements Serializable {
 		this.phoneNumber = phoneNumber;
 	}
 
-	public int getStatus() {
+	public Integer getStatus() {
 		return this.status;
 	}
 
-	public void setStatus(int status) {
+	public void setStatus(Integer status) {
 		this.status = status;
 	}
 
