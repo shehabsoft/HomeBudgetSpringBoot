@@ -28,7 +28,7 @@ public class OrderController {
 	@Autowired
 	private CleaningFeeDAO cleaningFeeDAO;
 
-
+	@CrossOrigin
 	@RequestMapping(value = "/Order/{id}", method = RequestMethod.GET)
 	public  ResponseEntity<Order>  getById(@PathVariable("id") Integer id) throws OrderNotFoundException {
 		try {
@@ -44,6 +44,7 @@ public class OrderController {
 
 		}
 	}
+	@CrossOrigin
 	@RequestMapping(value = "/Order/", method = RequestMethod.GET)
 	public  ResponseEntity<List<Order>>  getAll() throws OrderNotFoundException {
 		try {
@@ -62,6 +63,7 @@ public class OrderController {
 		}
 	}
 
+	@CrossOrigin
 	@Transactional(isolation = Isolation.SERIALIZABLE)
 	@RequestMapping(value = "/Order/", method = RequestMethod.POST)
 	public ResponseEntity<Order> create(@RequestBody Order order) throws OrderNotFoundException{
@@ -106,6 +108,7 @@ public class OrderController {
 
 	}
 
+	@CrossOrigin
 	@RequestMapping(value = "/Order/{id}", method = RequestMethod.PUT)
 	public ResponseEntity<Order> update(@PathVariable("id") int id, @RequestBody Order location) {
 
@@ -126,6 +129,7 @@ public class OrderController {
 		return new ResponseEntity<Order>(product, HttpStatus.OK);
 	}
 
+	@CrossOrigin
 	@RequestMapping(value = "/Order/{id}", method = RequestMethod.DELETE)
 	public ResponseEntity<Order> delete(@PathVariable("id") int id)throws OrderNotFoundException,OrderConstraintViolationException {
 		System.out.println("Fetching & Deleting User with id " + id);
