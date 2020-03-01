@@ -15,7 +15,7 @@ public class SpringConfig
 
         @Override
         public void addCorsMappings(CorsRegistry registry) {
-            registry.addMapping("/***").allowedOrigins("https://aqueous-temple-30838.herokuapp.com");
-            registry.addMapping("/**").allowedOrigins("https://aqueous-temple-30838.herokuapp.com/Order");
+            registry.addMapping("/**").allowedOrigins("https://aqueous-temple-30838.herokuapp.com");
+
         }
 }
