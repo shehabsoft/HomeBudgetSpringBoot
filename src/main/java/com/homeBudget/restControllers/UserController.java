@@ -1,22 +1,15 @@
 package com.homeBudget.restControllers;
 
 import com.homeBudget.dao.UserDAO;
-
-
 import com.homeBudget.exception.UserNotFoundException;
 import com.homeBudget.model.User;
-
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import javax.persistence.PersistenceException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -35,6 +28,22 @@ public class UserController {
 			User user = userDao.findById(id).get();
 			if (user == null) {
 				System.out.println("Unable to delete. User with id " + id + " not found");
+				return new ResponseEntity<User>(HttpStatus.NOT_FOUND) ;
+			}
+			return new ResponseEntity<User>(user,HttpStatus.OK) ;
+
+		} catch (Exception ex) {
+			throw new  UserNotFoundException(ex.getMessage());
+
+		}
+	}
+	@RequestMapping(value = "/UserEmail", method = RequestMethod.POST)
+	public  ResponseEntity<User>  getByEmail(@RequestBody User userRequest) throws UserNotFoundException {
+		try {
+
+			User user = userDao.findByEmail(userRequest.getEmail());
+			if (user == null) {
+				System.out.println("Unable to delete. User with id " + userRequest.getEmail() + " not found");
 				return new ResponseEntity<User>(HttpStatus.NOT_FOUND) ;
 			}
 			return new ResponseEntity<User>(user,HttpStatus.OK) ;
