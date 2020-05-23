@@ -4,21 +4,18 @@ import com.homeBudget.dao.ProductDAO;
 import com.homeBudget.dao.ProductSellerDAO;
 import com.homeBudget.exception.ProductConstraintViolationException;
 import com.homeBudget.exception.ProductNotFoundException;
-import com.homeBudget.exception.ProductNotFoundException;
-import com.homeBudget.model.OrdersProduct;
-import com.homeBudget.model.Product;
 import com.homeBudget.model.Product;
 import com.homeBudget.model.ProductsSeller;
+import com.homeBudget.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -70,13 +67,18 @@ public class ProductController {
 
 	@Transactional(isolation = Isolation.SERIALIZABLE)
 	@RequestMapping(value = "/Product/", method = RequestMethod.POST)
-	public ResponseEntity<Product> create(@RequestBody Product location) throws ProductNotFoundException{
+	public ResponseEntity<Product> create(@RequestBody Product product) throws ProductNotFoundException{
 
-		if (location != null) {
+		if (product != null) {
 
-
-			Product location1 = productDao.save(location);
-
+            User user= product.getUser();
+			Product location1 = productDao.save(product);
+			ProductsSeller productsSeller=new ProductsSeller();
+			productsSeller.setUser(user);
+			productsSeller.setProduct(location1);
+			productsSeller.setCreationDate(new Date().toString());
+			productsSeller.setSale(0);
+			productSellerDAO.save(productsSeller);
 //			URI locationU = ServletUriComponentsBuilder.fromCurrentRequest().path(
 //					"/{id}").buildAndExpand(location1.getId()).toUri();
 		//	return ResponseEntity.created(locationU).build();

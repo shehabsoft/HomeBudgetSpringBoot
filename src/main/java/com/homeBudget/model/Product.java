@@ -46,6 +46,9 @@ public class Product implements Serializable {
 	@OneToMany(mappedBy="product")
 	private List<OrdersProduct> ordersProducts;
 
+	@Transient
+	private User user;
+
 	public Product() {
 	}
 
@@ -133,5 +136,13 @@ public class Product implements Serializable {
 
 	public void setCategory(String category) {
 		this.category = category;
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
 	}
 }
