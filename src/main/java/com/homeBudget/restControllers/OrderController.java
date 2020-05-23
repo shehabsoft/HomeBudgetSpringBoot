@@ -1,13 +1,9 @@
 package com.homeBudget.restControllers;
 
-import com.homeBudget.dao.CleaningFeeDAO;
-import com.homeBudget.dao.OrderDAO;
-import com.homeBudget.dao.OrdersProductDAO;
+import com.homeBudget.dao.*;
 import com.homeBudget.exception.OrderConstraintViolationException;
 import com.homeBudget.exception.OrderNotFoundException;
-import com.homeBudget.model.CleaningFee;
-import com.homeBudget.model.Order;
-import com.homeBudget.model.OrdersProduct;
+import com.homeBudget.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +23,10 @@ public class OrderController {
 	private OrdersProductDAO orderProductDao;
 	@Autowired
 	private CleaningFeeDAO cleaningFeeDAO;
+    @Autowired
+	private ProductSellerDAO productsSellerDAO;
+	@Autowired
+	private UserDAO userDAO;
 
 	@CrossOrigin
 	@RequestMapping(value = "/Order/{id}", method = RequestMethod.GET)
@@ -38,6 +38,23 @@ public class OrderController {
 				return new ResponseEntity<Order>(HttpStatus.NOT_FOUND) ;
 			}
 			return new ResponseEntity<Order>(category,HttpStatus.OK) ;
+
+		} catch (Exception ex) {
+			throw new  OrderNotFoundException(ex.getMessage());
+
+		}
+	}
+	@CrossOrigin
+	@RequestMapping(value = "/Order/User/{userId}", method = RequestMethod.GET)
+	public  ResponseEntity<List<Order>> getOrdersByUserId(@PathVariable("userId") Integer userId) throws OrderNotFoundException {
+		try {
+			User user=userDAO.findById(userId).get();
+			List<Order> orderList = orderDao.findBySellerUser(user);
+			if (orderList == null) {
+
+				return new ResponseEntity<List<Order>>(HttpStatus.NOT_FOUND) ;
+			}
+			return new ResponseEntity<List<Order>>(orderList,HttpStatus.OK) ;
 
 		} catch (Exception ex) {
 			throw new  OrderNotFoundException(ex.getMessage());
@@ -73,13 +90,18 @@ public class OrderController {
 			order.setCreationDate(new Date());
 			order.setPhoneNumber("02"+order.getUser().getMobileNumber());
 			order.setUpdateDate(new Date());
-			Order order1 = orderDao.save(order);
-            List<OrdersProduct>ordersProducts=order.getOrdersProducts();
 
+            List<OrdersProduct>ordersProducts=order.getOrdersProducts();
+			ProductsSeller productsSeller=productsSellerDAO.findByProduct(ordersProducts.get(0).getProduct());
+			User sellerUser= productsSeller.getUser();
+			order.setSellerUser(sellerUser);
+			Order order1 = orderDao.save(order);
 			 for(int i=0;i<ordersProducts.size();i++) {
 				 OrdersProduct  ordersProduct=ordersProducts.get(i);
 				 ordersProduct.setCreationDate(new Date());
 				 ordersProduct.setOrder(order1);
+
+
 				 if( ordersProduct.getCleaningFeeId()!=null) {
 					 try {
 						 CleaningFee cleaningFee = cleaningFeeDAO.findById(ordersProduct.getCleaningFeeId()).get();

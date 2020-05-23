@@ -49,6 +49,9 @@ public class Order implements Serializable {
 	@OneToOne
 	@JoinColumn(name="user_id")
 	private User user;
+	@OneToOne
+	@JoinColumn(name="seller_user_id")
+	private User sellerUser;
 
 	private String zip;
 
@@ -170,5 +173,13 @@ public class Order implements Serializable {
 
 	public void setUser(User user) {
 		this.user = user;
+	}
+
+	public User getSellerUser() {
+		return sellerUser;
+	}
+
+	public void setSellerUser(User sellerUser) {
+		this.sellerUser = sellerUser;
 	}
 }
