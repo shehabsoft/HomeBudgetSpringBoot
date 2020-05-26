@@ -1,5 +1,8 @@
 package com.homeBudget.restControllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.homeBudget.ResponseMessage;
+import com.homeBudget.dao.FilesStorageService;
 import com.homeBudget.dao.ProductDAO;
 import com.homeBudget.dao.ProductSellerDAO;
 import com.homeBudget.exception.ProductConstraintViolationException;
@@ -13,7 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -28,6 +33,8 @@ public class ProductController {
 	@Autowired
 	private ProductSellerDAO productSellerDAO;
 
+	@Autowired
+	FilesStorageService storageService;
 
 	@RequestMapping(value = "/Product/{id}", method = RequestMethod.GET)
 	public  ResponseEntity<Product>  getById(@PathVariable("id") Integer id) throws ProductNotFoundException {
@@ -66,22 +73,25 @@ public class ProductController {
 	}
 
 	@Transactional(isolation = Isolation.SERIALIZABLE)
-	@RequestMapping(value = "/Product/", method = RequestMethod.POST)
-	public ResponseEntity<Product> create(@RequestBody Product product) throws ProductNotFoundException{
+	@RequestMapping(value = "/Product/", method = RequestMethod.POST,headers = "content-type=multipart/form-data")
+	public ResponseEntity<Product> create(@RequestParam("product") Product product) throws ProductNotFoundException{
 
 		if (product != null) {
 
             User user= product.getUser();
+
+
+
 			Product location1 = productDao.save(product);
 			ProductsSeller productsSeller=new ProductsSeller();
 			productsSeller.setUser(user);
 			productsSeller.setProduct(location1);
-			productsSeller.setCreationDate(new Date().toString());
+			SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+			String strDate= formatter.format(new Date());
+			productsSeller.setCreationDate(strDate);
 			productsSeller.setSale(0);
 			productSellerDAO.save(productsSeller);
-//			URI locationU = ServletUriComponentsBuilder.fromCurrentRequest().path(
-//					"/{id}").buildAndExpand(location1.getId()).toUri();
-		//	return ResponseEntity.created(locationU).build();
+
 			return new ResponseEntity<Product>(location1,HttpStatus.OK) ;
 		}else
 		{
@@ -91,6 +101,28 @@ public class ProductController {
 
 
 	}
+	@RequestMapping(value = "/Product/upload", method = RequestMethod.POST)
+	public ResponseEntity<ResponseMessage> uploadFile(@RequestParam("file") MultipartFile file,@RequestParam("product") String product) {
+		String message = "";
+		try {
+			Product product1=new ObjectMapper().readValue(product,Product.class);
+			product1.setImgData(file.getBytes());
+			User user= product1.getUser();
+			Product location1 = productDao.save(product1);
+			ProductsSeller productsSeller=new ProductsSeller();
+			productsSeller.setUser(user);
+			productsSeller.setProduct(location1);
+			productsSeller.setCreationDate(new Date().toString());
+			productsSeller.setSale(0);
+			productSellerDAO.save(productsSeller);
+			message = "Uploaded the file successfully: " + file.getOriginalFilename();
+			return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
+		} catch (Exception e) {
+			message = "Could not upload the file: " + file.getOriginalFilename() + "!";
+			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new ResponseMessage(message));
+		}
+	}
+
 
 	@RequestMapping(value = "/Product/{id}", method = RequestMethod.PUT)
 	public ResponseEntity<Product> update(@PathVariable("id") int id, @RequestBody Product location) {
@@ -110,16 +142,18 @@ public class ProductController {
 		///update location
 		return new ResponseEntity<Product>(product, HttpStatus.OK);
 	}
-
+@Transactional
 	@RequestMapping(value = "/Product/{id}", method = RequestMethod.DELETE)
 	public ResponseEntity<Product> delete(@PathVariable("id") int id)throws ProductNotFoundException,ProductConstraintViolationException {
 		System.out.println("Fetching & Deleting User with id " + id);
 
-		Product user = productDao.findById(id).get();
-		if (user == null) {
+		Product product = productDao.findById(id).get();
+		if (product == null) {
 		 throw new ProductNotFoundException("Unable to delete. Product with id \" + id + \" not found");
 		}
 			try {
+				ProductsSeller productsSeller=productSellerDAO.findByProduct(product);
+				productSellerDAO.delete(productsSeller);
 				productDao.deleteById(id);
 				return new ResponseEntity<Product>(HttpStatus.OK);
 			}catch (Exception ex)

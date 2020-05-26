@@ -1,6 +1,7 @@
 package com.homeBudget.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.Serializable;
 import javax.persistence.*;
@@ -28,7 +29,10 @@ public class Product implements Serializable {
 	private String imgUrl;
 
 	@Column(name="img_data")
-	private Byte[] imgData;
+	private byte[] imgData;
+
+	@Transient
+	private MultipartFile file ;
 
 	@Column(name="name_ar")
 	private String nameAr;
@@ -122,11 +126,11 @@ public class Product implements Serializable {
 		return ordersProduct;
 	}
 
-	public Byte[] getImgData() {
+	public byte[] getImgData() {
 		return imgData;
 	}
 
-	public void setImgData(Byte[] imgData) {
+	public void setImgData(byte[] imgData) {
 		this.imgData = imgData;
 	}
 
@@ -144,5 +148,13 @@ public class Product implements Serializable {
 
 	public void setUser(User user) {
 		this.user = user;
+	}
+
+	public MultipartFile getFile() {
+		return file;
+	}
+
+	public void setFile(MultipartFile file) {
+		this.file = file;
 	}
 }
