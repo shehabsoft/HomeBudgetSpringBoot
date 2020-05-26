@@ -12,5 +12,5 @@ public interface OrderDAO extends CrudRepository<Order, Integer>{
 
     List<Order>findByStatus(Integer status);
     List<Order>findByUser(User user);
-    List<Order>findBySellerUser(User user);
+    List<Order>findBySellerUserAndByStatus(User user,Integer status);
 }
