@@ -49,7 +49,7 @@ public class OrderController {
 	public  ResponseEntity<List<Order>> getOrdersByUserId(@PathVariable("userId") Integer userId) throws OrderNotFoundException {
 		try {
 			User user=userDAO.findById(userId).get();
-			List<Order> orderList = orderDao.findBySellerUserAndByStatus(user,2);
+			List<Order> orderList = orderDao.findBySellerUser(user);
 			if (orderList == null) {
 
 				return new ResponseEntity<List<Order>>(HttpStatus.NOT_FOUND) ;
