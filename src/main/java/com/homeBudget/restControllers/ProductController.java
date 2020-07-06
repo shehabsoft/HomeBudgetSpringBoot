@@ -36,6 +36,7 @@ public class ProductController {
 	@Autowired
 	FilesStorageService storageService;
 
+	@CrossOrigin
 	@RequestMapping(value = "/Product/{id}", method = RequestMethod.GET)
 	public  ResponseEntity<Product>  getById(@PathVariable("id") Integer id) throws ProductNotFoundException {
 		try {
@@ -51,6 +52,7 @@ public class ProductController {
 
 		}
 	}
+	@CrossOrigin
 	@RequestMapping(value = "/Product/", method = RequestMethod.GET)
 	public  ResponseEntity<List<ProductsSeller>>  getAll() throws ProductNotFoundException {
 		try {
@@ -72,6 +74,7 @@ public class ProductController {
 		}
 	}
 
+	@CrossOrigin
 	@Transactional(isolation = Isolation.SERIALIZABLE)
 	@RequestMapping(value = "/Product/", method = RequestMethod.POST,headers = "content-type=multipart/form-data")
 	public ResponseEntity<Product> create(@RequestParam("product") Product product) throws ProductNotFoundException{
@@ -101,6 +104,7 @@ public class ProductController {
 
 
 	}
+	@CrossOrigin
 	@RequestMapping(value = "/Product/upload", method = RequestMethod.POST)
 	public ResponseEntity<ResponseMessage> uploadFile(@RequestParam("file") MultipartFile file,@RequestParam("product") String product) {
 		String message = "";
@@ -123,7 +127,7 @@ public class ProductController {
 		}
 	}
 
-
+	@CrossOrigin
 	@RequestMapping(value = "/Product/{id}", method = RequestMethod.PUT)
 	public ResponseEntity<Product> update(@PathVariable("id") int id, @RequestBody Product location) {
 
@@ -142,6 +146,7 @@ public class ProductController {
 		///update location
 		return new ResponseEntity<Product>(product, HttpStatus.OK);
 	}
+	@CrossOrigin
 @Transactional
 	@RequestMapping(value = "/Product/{id}", method = RequestMethod.DELETE)
 	public ResponseEntity<Product> delete(@PathVariable("id") int id)throws ProductNotFoundException,ProductConstraintViolationException {

@@ -4,12 +4,18 @@ import com.homeBudget.dao.UserDAO;
 import com.homeBudget.exception.UserNotFoundException;
 import com.homeBudget.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -21,10 +27,19 @@ public class UserController {
 	@Autowired
 	private UserDAO userDao;
 
+	@Autowired
+	private JavaMailSender javaMailSender;
 
 	@RequestMapping(value = "/User/{id}", method = RequestMethod.GET)
 	public  ResponseEntity<User>  getById(@PathVariable("id") Integer id) throws UserNotFoundException {
 		try {
+//			SimpleMailMessage simpleMailMessage=new SimpleMailMessage();
+//			simpleMailMessage.setCc("shehabsoft94@gmail.com");
+//			simpleMailMessage.setFrom("shehabsoft94@gmail.com");
+//			simpleMailMessage.setText("said Mohammed");
+//			simpleMailMessage.setSubject("Smart Services  Mail");
+//			javaMailSender.send(simpleMailMessage);
+			sendEmailWithAttachment();
 			User user = userDao.findById(id).get();
 			if (user == null) {
 				System.out.println("Unable to delete. User with id " + id + " not found");
@@ -36,6 +51,34 @@ public class UserController {
 			throw new  UserNotFoundException(ex.getMessage());
 
 		}
+	}
+	void sendEmailWithAttachment() throws MessagingException, IOException {
+
+		MimeMessage msg = javaMailSender.createMimeMessage();
+
+		// true = multipart message
+		MimeMessageHelper helper = new MimeMessageHelper(msg, true);
+		helper.setTo("shehabsoft94@gmail.com");
+
+		helper.setSubject("Testing from Spring Boot");
+
+		// default = text/plain
+		//helper.setText("Check attachment for image!");
+
+		// true = text/html
+		helper.setText("<h1>Check attachment for image!</h1>", true);
+
+		//FileSystemResource file = new FileSystemResource(new File("classpath:android.png"));
+
+		//Resource resource = new ClassPathResource("android.png");
+		//InputStream input = resource.getInputStream();
+
+		//ResourceUtils.getFile("classpath:android.png");
+
+		helper.addAttachment("my_photo.png", new ClassPathResource("android.png"));
+
+		javaMailSender.send(msg);
+
 	}
 	@RequestMapping(value = "/UserEmail", method = RequestMethod.POST)
 	public  ResponseEntity<User>  getByEmail(@RequestBody User userRequest) throws UserNotFoundException {
