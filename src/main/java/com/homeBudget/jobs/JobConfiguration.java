@@ -22,7 +22,7 @@ public class JobConfiguration {
 
         return TriggerBuilder.newTrigger().forJob(UpdateRecovedPateintsJob)
             .withIdentity("updateRecovedPateintsJobTrigger")
-            .withSchedule(CronScheduleBuilder.cronSchedule("0 0/3 * 1/1 * ?"))
+            .withSchedule(CronScheduleBuilder.cronSchedule("0 0 0 ? * WED *"))
             .build();
     }
 
