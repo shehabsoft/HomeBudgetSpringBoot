@@ -256,7 +256,7 @@ public class OrderController {
 
 			 }
 			try {
-			sendEmailWithAttachment(order1);
+			//sendEmailWithAttachment(order1);
 			}catch(Exception e)
 			{
 				e.printStackTrace();
