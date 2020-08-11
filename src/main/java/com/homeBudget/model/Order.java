@@ -1,10 +1,9 @@
 package com.homeBudget.model;
 
 import java.io.Serializable;
-import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
-
+import javax.persistence.*;
 
 /**
  * The persistent class for the orders database table.
@@ -27,9 +26,7 @@ public class Order implements Serializable {
 
 
 
-	@OneToOne
-	@JoinColumn(name="country_id")
-	private Country country;
+
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="creation_date")
@@ -86,13 +83,6 @@ public class Order implements Serializable {
 		this.address2 = address2;
 	}
 
-	public Country getCountry() {
-		return country;
-	}
-
-	public void setCountry(Country country) {
-		this.country = country;
-	}
 
 
 
