@@ -8,12 +8,15 @@ import com.homeBudget.model.*;
 import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.imageio.ImageIO;
@@ -27,9 +30,13 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
+
+
 @RestController
 public class OrderController {
 
@@ -47,11 +54,49 @@ public class OrderController {
 	private NotificationTemplateDAO notificationTemplateDAO;
 
 	@Autowired
+	private CountryDAO countryDAO;
+	@Autowired
 	private NotificationsDAO notificationsDAO;
 
 	@Autowired
 	private JavaMailSender javaMailSender;
 
+	void forgetPassword(User user)throws MessagingException, IOException
+	{
+		MimeMessage msg = javaMailSender.createMimeMessage();
+
+
+		NotificationTemplate notificationTemplate=notificationTemplateDAO.findByCode(2);
+		MimeMessageHelper helper = new MimeMessageHelper(msg, true);
+		helper.setTo(user.getEmail());
+		helper.setCc("shehabsoft94@gmail.com");
+
+		helper.setSubject("Forget Password");
+		NotificationTemplateSection notificationTemplateSection=notificationTemplate.getNotificationTemplateSection();
+		StringBuilder mailBuilder=new StringBuilder();
+		String header=notificationTemplateSection.getHeaderSection();
+		header=header.replace("[USER_NUMBER]",user.getEmail()+"");
+		header=header.replace("[USER_PASSWORD]",user.getPassword()+"");
+
+
+
+
+
+
+		mailBuilder.append(header);
+		helper.setText(mailBuilder.toString(), true);
+		System.out.println(mailBuilder.toString());
+		Notifications notifications=new Notifications();
+		notifications.setMail_to(user.getEmail());
+		notifications.setStatus(1);
+		notifications.setNotification_content(header.toString());
+ 		notificationsDAO.save(notifications);
+		helper.setText(mailBuilder.toString(), true);
+
+
+        javaMailSender.send(msg);
+
+	}
 	String mailBody=" ";
 	void sendEmailWithAttachment(Order order) throws MessagingException, IOException {
 
@@ -224,52 +269,60 @@ public class OrderController {
 	@RequestMapping(value = "/Order/", method = RequestMethod.POST)
 	public ResponseEntity<Order> create(@RequestBody Order order) throws OrderNotFoundException{
 
-		if (order != null&&order.getOrdersProducts()!=null&&order.getUser()!=null) {
-			order.setTotal(order.getTotal()+30);
-			order.setCreationDate(new Date());
-			order.setPhoneNumber("02"+order.getUser().getMobileNumber());
-			order.setUpdateDate(new Date());
-
-            List<OrdersProduct>ordersProducts=order.getOrdersProducts();
-			ProductsSeller productsSeller=productsSellerDAO.findByProduct(ordersProducts.get(0).getProduct());
-			User sellerUser= productsSeller.getUser();
-			order.setSellerUser(sellerUser);
-			Order order1 = orderDao.save(order);
-			 for(int i=0;i<ordersProducts.size();i++) {
-				 OrdersProduct  ordersProduct=ordersProducts.get(i);
-				 ordersProduct.setCreationDate(new Date());
-				 ordersProduct.setOrder(order1);
+		try {
 
 
-				 if( ordersProduct.getCleaningFeeId()!=null) {
-					 try {
-						 CleaningFee cleaningFee = cleaningFeeDAO.findById(ordersProduct.getCleaningFeeId()).get();
-						 ordersProduct.setCleaningFee(cleaningFee);
-					 }catch (Exception e)
-					 {
-						// e.printStackTrace();
-					 }
-				 }
+			if (order != null && order.getOrdersProducts() != null && order.getUser() != null) {
+				order.setTotal(order.getTotal() + 30);
+				order.setCreationDate(new Date());
+				order.setPhoneNumber("02" + order.getUser().getMobileNumber());
+				order.setUpdateDate(new Date());
 
-				 orderProductDao.save(ordersProducts.get(i));
+				List<OrdersProduct> ordersProducts = order.getOrdersProducts();
+				ProductsSeller productsSeller = productsSellerDAO.findByProduct(ordersProducts.get(0).getProduct());
+				User sellerUser = productsSeller.getUser();
+				order.setSellerUser(sellerUser);
+				Country country = new Country();
+				country.setId(1);
+				//order.setCountry(country);
+				Order order1 = orderDao.save(order);
+				for (int i = 0; i < ordersProducts.size(); i++) {
+					OrdersProduct ordersProduct = ordersProducts.get(i);
+					ordersProduct.setCreationDate(new Date());
+					ordersProduct.setOrder(order1);
 
 
-			 }
-			try {
-			//sendEmailWithAttachment(order1);
-			}catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+					if (ordersProduct.getCleaningFeeId() != null) {
+						try {
+							CleaningFee cleaningFee = cleaningFeeDAO.findById(ordersProduct.getCleaningFeeId()).get();
+							ordersProduct.setCleaningFee(cleaningFee);
+						} catch (Exception e) {
+							// e.printStackTrace();
+						}
+					}
+
+					orderProductDao.save(ordersProduct);
+
+
+				}
+				try {
+					//sendEmailWithAttachment(order1);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 //			URI locationU = ServletUriComponentsBuilder.fromCurrentRequest().path(
 //					"/{id}").buildAndExpand(location1.getId()).toUri();
-		//	return ResponseEntity.created(locationU).build();
+				//	return ResponseEntity.created(locationU).build();
 
-			return new ResponseEntity<Order>(order1,HttpStatus.OK) ;
-		}else
+				return new ResponseEntity<Order>(order1, HttpStatus.OK);
+			} else {
+				throw new OrderNotFoundException("please privide Order In Request Body");
+
+			}
+		}catch ( Exception e)
 		{
-			 throw new OrderNotFoundException("please privide Order In Request Body");
-
+			e.printStackTrace();
+			return new ResponseEntity<Order>(HttpStatus.EXPECTATION_FAILED);
 		}
 
 
