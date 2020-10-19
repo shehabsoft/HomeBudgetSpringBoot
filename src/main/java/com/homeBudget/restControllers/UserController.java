@@ -11,10 +11,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 public class UserController {
@@ -54,6 +51,7 @@ public class UserController {
 
 				String token = UUID.randomUUID().toString();
 				user1.setToken(token);
+				user1.setLastLoginDate(new Date());
 				user1=userDao.save(user1);
 				return new ResponseEntity<User>(user1, HttpStatus.OK);
 			}

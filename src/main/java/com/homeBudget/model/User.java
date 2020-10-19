@@ -3,10 +3,9 @@ package com.homeBudget.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.io.Serializable;
-import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
-
+import javax.persistence.*;
 
 /**
  * The persistent class for the users database table.
@@ -27,6 +26,10 @@ public class User implements Serializable {
 
 	@Column(name = "creation_date")
 	private Date creationDate;
+
+
+	@Column(name = "last_login_date")
+	private Date lastLoginDate;
 
 	private String email;
 
@@ -205,5 +208,13 @@ public class User implements Serializable {
 
 	public void setAdmin(Boolean admin) {
 		this.admin = admin;
+	}
+
+	public Date getLastLoginDate() {
+		return lastLoginDate;
+	}
+
+	public void setLastLoginDate(Date lastLoginDate) {
+		this.lastLoginDate = lastLoginDate;
 	}
 }
