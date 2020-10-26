@@ -3,6 +3,7 @@ package com.homeBudget.restControllers;
 import com.homeBudget.dao.UserDAO;
 import com.homeBudget.exception.UserNotFoundException;
 import com.homeBudget.model.User;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -107,29 +108,54 @@ public class UserController {
 		}
 	}
 
-	@Transactional(isolation = Isolation.SERIALIZABLE)
+
 	@RequestMapping(value = "/User/", method = RequestMethod.POST)
 	public ResponseEntity<User> create(@RequestBody User user) throws UserNotFoundException {
 
-		if (user != null) {
 
-				String token = UUID.randomUUID().toString();
-				System.out.println("token is :" + token);
-				user.setToken(token);
-				   User user1 = userDao.save(user);
-
-				return   new ResponseEntity<User>(user1,HttpStatus.OK) ;
-			}else
-			{
+		User user1=null;
+			if (user != null) {
+				try {
+					String token = UUID.randomUUID().toString();
+					if(user.getAddress()==null)
+					{
+						throw new UserNotFoundException("User Address Can not be Empty");
+					}
+					if(user.getMobileNumber()==null)
+					{
+						throw new UserNotFoundException("Mobile Number Can not be Empty");
+					}
+					if(user.getEmail()==null)
+					{
+						throw new UserNotFoundException("Email Can not be Empty");
+					}
+					if(user.getPassword()==null)
+					{
+						throw new UserNotFoundException("Password Can not be Empty");
+					}
+					if(user.getName()==null)
+					{
+						throw new UserNotFoundException("Name Can not be Empty");
+					}
+					System.out.println("token is :" + token);
+					user.setToken(token);
+					  user1 = userDao.save(user);
+				}
+				catch(Exception ex)
+					{
+						throw new UserNotFoundException(ex.getMessage());
+					}
+				return new ResponseEntity<User>(user1, HttpStatus.OK);
+			} else {
 				throw new UserNotFoundException("please privide User In Request Body");
 
 			}
+		}
 
 
 
 
 
-	}
 
 	@RequestMapping(value = "/User/{id}", method = RequestMethod.PUT)
 	public ResponseEntity<User> update(@PathVariable("id") int id, @RequestBody User user) {
