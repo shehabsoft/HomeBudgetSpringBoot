@@ -37,7 +37,7 @@ public class User implements Serializable {
 	private int genderId;
 
 	@Column(name = "mobile_number")
-	private int mobileNumber;
+	private Integer mobileNumber;
 
 	private String name;
 
@@ -116,11 +116,11 @@ public class User implements Serializable {
 		this.genderId = genderId;
 	}
 
-	public int getMobileNumber() {
+	public Integer getMobileNumber() {
 		return this.mobileNumber;
 	}
 
-	public void setMobileNumber(int mobileNumber) {
+	public void setMobileNumber(Integer mobileNumber) {
 		this.mobileNumber = mobileNumber;
 	}
 
