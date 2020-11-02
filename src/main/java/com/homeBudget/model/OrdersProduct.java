@@ -1,11 +1,14 @@
 package com.homeBudget.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.Cascade;
 
 import java.io.Serializable;
-import javax.persistence.*;
 import java.util.Date;
+import javax.persistence.*;
 
+import static javax.persistence.CascadeType.*;
+import static org.hibernate.annotations.CascadeType.SAVE_UPDATE;
 
 /**
  * The persistent class for the orders_products database table.
@@ -27,6 +30,7 @@ public class OrdersProduct implements Serializable {
 	private Date creationDate;
 
 	private double quantity;
+	@Cascade({SAVE_UPDATE})
     @Transient
 	private Integer cleaningFeeId;
 
@@ -39,7 +43,8 @@ public class OrdersProduct implements Serializable {
 
 
 
-	@ManyToOne
+	@ManyToOne( cascade = ALL)
+	@JoinColumn(name = "cleaningFeeId", referencedColumnName = "id", nullable = true)
 	private CleaningFee cleaningFee;
 
 	//bi-directional many-to-one association to Product

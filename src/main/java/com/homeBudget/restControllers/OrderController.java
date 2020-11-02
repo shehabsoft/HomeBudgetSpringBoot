@@ -292,7 +292,7 @@ public class OrderController {
 					ordersProduct.setOrder(order1);
 
 
-					if (ordersProduct.getCleaningFeeId() != null) {
+					if (ordersProduct.getCleaningFeeId() != null&&ordersProduct.getCleaningFeeId()!=0) {
 						try {
 							CleaningFee cleaningFee = cleaningFeeDAO.findById(ordersProduct.getCleaningFeeId()).get();
 							ordersProduct.setCleaningFee(cleaningFee);
