@@ -3,9 +3,8 @@ package com.homeBudget.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.Serializable;
 import javax.persistence.*;
-import java.sql.Blob;
+import java.io.Serializable;
 import java.util.List;
 
 
@@ -44,6 +43,8 @@ public class Product implements Serializable {
 	private String category;
 
 	private double price;
+	@Column(name="seller_price")
+	private Double sellerPrice;
 
 	@JsonIgnore
 	//bi-directional many-to-one association to OrdersProduct
@@ -156,5 +157,13 @@ public class Product implements Serializable {
 
 	public void setFile(MultipartFile file) {
 		this.file = file;
+	}
+
+	public Double getSellerPrice() {
+		return sellerPrice;
+	}
+
+	public void setSellerPrice(Double sellerPrice) {
+		this.sellerPrice = sellerPrice;
 	}
 }
