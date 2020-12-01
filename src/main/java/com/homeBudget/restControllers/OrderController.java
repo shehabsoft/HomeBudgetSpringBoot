@@ -4,7 +4,7 @@ import com.homeBudget.dao.*;
 import com.homeBudget.exception.OrderConstraintViolationException;
 import com.homeBudget.exception.OrderNotFoundException;
 import com.homeBudget.jobs.ContentIdGenerator;
-import com.homeBudget.jobs.SentMailThread;
+
 import com.homeBudget.model.*;
 import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
