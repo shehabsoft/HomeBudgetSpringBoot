@@ -4,6 +4,7 @@ import com.homeBudget.dao.*;
 import com.homeBudget.exception.OrderConstraintViolationException;
 import com.homeBudget.exception.OrderNotFoundException;
 import com.homeBudget.jobs.ContentIdGenerator;
+import com.homeBudget.jobs.SentMailThread;
 import com.homeBudget.model.*;
 import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,7 +99,8 @@ public class OrderController {
 
 	}
 	String mailBody=" ";
-	void sendEmailWithAttachment(Order order) throws MessagingException, IOException {
+	public void sendEmailWithAttachment(Order order) throws MessagingException, IOException {
+
 
 	 	MimeMessage msg = javaMailSender.createMimeMessage();
 
@@ -127,6 +129,8 @@ public class OrderController {
 		footerSection=footerSection.replace("[CLEANING_SERVICE_FEE]",order.getOrdersProducts().get(0).getCleaningFee().getFeeAmount()+"");
 		footerSection=footerSection.replace("[CLEANING_SERVICE_ITEM_COUNT]",order.getOrdersProducts().size()+"");
 		footerSection=footerSection.replace("[TOTAL_ITEMS]",order.getOrdersProducts().size()+"");
+		footerSection=footerSection.replace("[SHIPING]","30");
+		footerSection=footerSection.replace("[PACKING]",order.getOrdersProducts().size()*5+"");
 		footerSection=footerSection.replace("[ORDER_TOTAL_FEES]",order.getTotal()+"");
 		footerSection=footerSection.replace("[DISCOUNT]", "0");
 		footerSection=footerSection.replace("[ORDER_TOTAL_FEES]", order.getTotal()+"");
@@ -135,15 +139,17 @@ public class OrderController {
 		{
 			String tableSection=notificationTemplateSection.getTableSection();
 			tableSection=tableSection.replace("[ITEM_ID]",order.getOrdersProducts().get(i).getProduct().getId()+"");
-			tableSection=tableSection.replace("[ITEM_NAME_EN]",order.getOrdersProducts().get(i).getProduct().getNameAr());
+			tableSection=tableSection.replace("[ITEM_NAME_EN]",order.getOrdersProducts().get(i).getProduct().getNameEn());
+			tableSection=tableSection.replace("[ITEM_NAME_AR]",order.getOrdersProducts().get(i).getProduct().getNameAr());
 			tableSection=tableSection.replace("[ITEM_AMOUNT]",order.getOrdersProducts().get(i).getQuantity()+"");
 			tableSection=tableSection.replace("[ITEM_FEE]",order.getOrdersProducts().get(i).getProduct().getPrice()+"");
-			System.out.println("Image Data :"+order.getOrdersProducts().get(i).getProduct().getImgData().clone());
-			String encodedImage = Base64.encode(order.getOrdersProducts().get(i).getProduct().getImgData());
+			//System.out.println("Image Data :"+order.getOrdersProducts().get(i).getProduct().getImgData().clone());
 
-		    File imge=	convertImage(order.getOrdersProducts().get(i).getProduct().getImgData());
-			String contentId = ContentIdGenerator.getContentId();
-			tableSection=tableSection.replace("[ITEM_IMG_DATA]",encodedImage);
+		//	String encodedImage = Base64.encode(order.getOrdersProducts().get(i).getProduct().getImgData());
+
+		  //  File imge=	convertImage(order.getOrdersProducts().get(i).getProduct().getImgData());
+			//String contentId = ContentIdGenerator.getContentId();
+			tableSection=tableSection.replace("[ITEM_IMG_DATA]",order.getOrdersProducts().get(i).getProduct().getNameEn());
 			alltables.append(tableSection);
 		}
 
@@ -170,7 +176,7 @@ public class OrderController {
 
 		//helper.addAttachment("my_photo.png", new ClassPathResource("android.png"));
 
-		//javaMailSender.send(msg);
+		javaMailSender.send(msg);
 
 	}
 
@@ -306,6 +312,19 @@ public class OrderController {
 
 				}
 				try {
+
+					new Thread("sentMail"){
+						public void run(){
+							System.out.println("Thread: " + getName() + " running");
+							try {
+								sendEmailWithAttachment(order1);
+							} catch (MessagingException e) {
+								e.printStackTrace();
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+						}
+					}.start();
 					//sendEmailWithAttachment(order1);
 				} catch (Exception e) {
 					e.printStackTrace();
