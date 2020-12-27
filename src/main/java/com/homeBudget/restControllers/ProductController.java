@@ -1,5 +1,6 @@
 package com.homeBudget.restControllers;
 
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.homeBudget.ResponseMessage;
 import com.homeBudget.dao.FilesStorageService;
@@ -13,11 +14,11 @@ import com.homeBudget.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
+import org.springframework.web.bind.annotation.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -56,7 +57,7 @@ public class ProductController {
 	@RequestMapping(value = "/Product/", method = RequestMethod.GET)
 	public  ResponseEntity<List<ProductsSeller>>  getAll() throws ProductNotFoundException {
 		try {
-			Iterator<ProductsSeller> productsSellerIterator = productSellerDAO.findAll().iterator();
+			Iterator<ProductsSeller> productsSellerIterator = productSellerDAO.getByProductStatus(2).iterator();
 			List<ProductsSeller>productsSellersList=new ArrayList<>();
 			if (productsSellerIterator == null) {
 
@@ -83,7 +84,7 @@ public class ProductController {
 
             User user= product.getUser();
 
-
+			product.setStatus(2);
 
 			Product location1 = productDao.save(product);
 			ProductsSeller productsSeller=new ProductsSeller();
@@ -106,10 +107,10 @@ public class ProductController {
 	}
 	@CrossOrigin
 	@RequestMapping(value = "/Product/upload", method = RequestMethod.POST)
-	public ResponseEntity<ResponseMessage> uploadFile(@RequestParam("file") MultipartFile file,@RequestParam("product") String product) {
+	public ResponseEntity<ResponseMessage> uploadFile(@RequestParam("file") MultipartFile file,@RequestParam("product") String product) throws Exception {
 		String message = "";
 		try {
-			Product product1=new ObjectMapper().readValue(product,Product.class);
+			Product product1 = new ObjectMapper().readValue(product, Product.class);
 			product1.setImgData(file.getBytes());
 			User user= product1.getUser();
 			Product location1 = productDao.save(product1);
@@ -119,10 +120,10 @@ public class ProductController {
 			productsSeller.setCreationDate(new Date().toString());
 			productsSeller.setSale(0);
 			productSellerDAO.save(productsSeller);
-			message = "Uploaded the file successfully: " + file.getOriginalFilename();
+		//	message = "Uploaded the file successfully: " + file.getOriginalFilename();
 			return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
 		} catch (Exception e) {
-			message = "Could not upload the file: " + file.getOriginalFilename() + "!";
+		//	message = "Could not upload the file: " + file.getOriginalFilename() + "!";
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new ResponseMessage(message));
 		}
 	}
