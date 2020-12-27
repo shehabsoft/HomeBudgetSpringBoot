@@ -54,6 +54,9 @@ public class Product implements Serializable {
 	@Transient
 	private User user;
 
+	@Column(name="status")
+	private Integer status;
+
 	public Product() {
 	}
 
@@ -165,5 +168,13 @@ public class Product implements Serializable {
 
 	public void setSellerPrice(Double sellerPrice) {
 		this.sellerPrice = sellerPrice;
+	}
+
+	public Integer getStatus() {
+		return status;
+	}
+
+	public void setStatus(Integer status) {
+		this.status = status;
 	}
 }
