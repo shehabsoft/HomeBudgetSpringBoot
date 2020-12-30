@@ -53,7 +53,13 @@ public class CleaningFeeController {
 			}
 		     while(productsSellerIterator.hasNext())
 			 {
-				 productsSellersList.add(productsSellerIterator.next());
+				 CleaningFee cleaningFee=productsSellerIterator.next();
+				 if(cleaningFee!=null) {
+					 productsSellersList.add(cleaningFee);
+				 }else
+				 {
+				 	break;
+				 }
 			 }
 			return new ResponseEntity<List<CleaningFee>>(productsSellersList,HttpStatus.OK) ;
 
